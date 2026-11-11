@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { chatMessageLimit, isUuid } from "../lib/chat";
 import { defaultClientLanguage } from "../lib/client-language";
-import { getDriver } from "../lib/demo-accounts";
+import { demoPassword, getDriver } from "../lib/demo-accounts";
 import { endSession, requireRole, startSession } from "../lib/demo-session";
-import { createService, sendServiceNotice } from "../lib/demo-store";
+import { createService, getDemoPickup, listDemoPickups, sendClientChat, sendDriverChat, sendServiceNotice } from "../lib/demo-store";
+import { dominicanDay, pickupTimeLabel } from "../lib/dominican-time";
 
 export type ActionState = { error?: string; success?: string };
 type ServiceActionState = ActionState & { lastCreatedServiceId?: string };
@@ -40,6 +42,50 @@ export async function signIn(_state: ActionState, formData: FormData): Promise<A
 export async function signOut() {
   await endSession();
   redirect("/");
+}
+
+export async function getDispatchDemoChoices() {
+  await requireRole("dispatch");
+  const services = await listDemoPickups(dominicanDay());
+  return services.map((service) => ({
+    id: service.id,
+    client: service.client_name,
+    driver: getDriver(service.driver_id)?.name,
+    time: pickupTimeLabel(service.pickup_time.slice(0, 5)),
+  }));
+}
+
+export async function openDispatchDemo(_state: ActionState, formData: FormData): Promise<ActionState> {
+  await requireRole("dispatch");
+  const id = field(formData, "serviceId");
+  const destination = field(formData, "destination");
+  if (!isUuid(id) || (destination !== "driver" && destination !== "client")) {
+    return { error: "Choose a pickup and a demo view." };
+  }
+
+  let href: string;
+  try {
+    const pickup = await getDemoPickup(dominicanDay(), { id });
+    if (!pickup) return { error: "This pickup is no longer available for today." };
+    if (destination === "client") {
+      href = `/client/${pickup.client_token}?demo=1`;
+    } else {
+      const driver = getDriver(pickup.driver_id);
+      if (!driver) return { error: "This pickup has no demo driver." };
+      const account = await startSession(driver.email, demoPassword);
+      if (account?.id !== driver.id) return { error: "Could not sign in as the assigned driver." };
+      href = `/driver?service=${pickup.id}`;
+    }
+  } catch {
+    return { error: "Could not open the demo view. Please try again." };
+  }
+  redirect(href);
+}
+
+export async function returnToDispatchDemo() {
+  await requireRole("driver");
+  await endSession();
+  redirect("/?account=dispatch");
 }
 
 export async function addService(state: ServiceActionState, formData: FormData): Promise<ServiceActionState> {
@@ -88,5 +134,27 @@ export async function notifyClient(_state: ActionState, formData: FormData): Pro
     return { error: "The notice could not be saved. Please try again." };
   }
   revalidatePath("/driver");
-  return { success: "Client notice recorded." };
+  return { success: "Notice sent to the client inbox." };
+}
+
+export async function postClientChat(token: string, id: string, message: string): Promise<boolean> {
+  const body = typeof message === "string" ? message.trim() : "";
+  if (typeof token !== "string" || typeof id !== "string" || !isUuid(id) || !body || body.length > chatMessageLimit) return false;
+  try {
+    return await sendClientChat(token, id, body);
+  } catch {
+    return false;
+  }
+}
+
+export async function postDriverChat(serviceId: string, id: string, message: string): Promise<boolean> {
+  await requireRole("driver");
+  const body = typeof message === "string" ? message.trim() : "";
+  if (typeof serviceId !== "string" || typeof id !== "string" || !isUuid(id) || !isUuid(serviceId) || !body || body.length > chatMessageLimit) return false;
+  try {
+    await sendDriverChat(serviceId, id, body);
+    return true;
+  } catch {
+    return false;
+  }
 }

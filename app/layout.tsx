@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   icons: { icon: { url: "/transekur-mark.png", type: "image/png" } },
   robots: { index: false, follow: false },
 };
+
+export const viewport: Viewport = { viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

@@ -28,8 +28,8 @@ export function pickupTimeLabel(time: string) {
   }).format(new Date(`2000-01-01T${time}:00Z`));
 }
 
-export function sentTimeLabel(instant: string) {
-  return new Intl.DateTimeFormat("en-US", {
+export function sentTimeLabel(instant: string, locale = "en-US") {
+  return new Intl.DateTimeFormat(locale, {
     timeZone,
     month: "short",
     day: "numeric",

@@ -48,7 +48,7 @@ export default async function DispatchPage() {
                           <h3>{service.clientName}</h3>
                           <p className="muted">{service.phone} · {clientLanguageLabels[service.clientLanguage]} notice</p>
                         </div>
-                        <span className={`status ${service.sentAt ? "sent" : "waiting"}`}>{service.sentAt ? "Sent (simulated)" : "Awaiting notice"}</span>
+                        <span className={`status ${service.sentAt ? "sent" : "waiting"}`}>{service.sentAt ? "Sent to inbox" : "Awaiting notice"}</span>
                       </div>
                       <div className="service-details">
                         <p><Icon name="pin" />{service.pickupPoint}</p>
@@ -56,7 +56,7 @@ export default async function DispatchPage() {
                         <p><Icon name="car" /><span>{driver?.name}<small>{driver?.vehicle} · {driver?.plate}</small></span></p>
                       </div>
                       {service.sentAt && <div className="notice-log"><time dateTime={service.sentAt}>{sentTimeLabel(service.sentAt)}</time><p>{service.message}</p></div>}
-                      <a className="text-link preview-link" href={`/client/${service.clientToken}`} target="_blank" rel="noreferrer">Client preview<Icon name="external" /></a>
+                      <a className="text-link preview-link" href={`/client/${service.clientToken}`} target="_blank" rel="noreferrer">Open client portal<Icon name="external" /></a>
                     </li>
                   );
                 })}

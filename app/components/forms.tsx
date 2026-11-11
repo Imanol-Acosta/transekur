@@ -12,10 +12,10 @@ function FormFeedback({ state }: { state: ActionState }) {
   return null;
 }
 
-export function SignInForm() {
+export function SignInForm({ preselectDispatch = false }: { preselectDispatch?: boolean }) {
   const [state, action, pending] = useActionState(signIn, {});
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(preselectDispatch ? dispatchAccount.email : "");
+  const [password, setPassword] = useState(preselectDispatch ? demoPassword : "");
 
   return (
     <>

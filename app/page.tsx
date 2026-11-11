@@ -3,9 +3,10 @@ import { currentAccount } from "../lib/demo-session";
 import { Brand } from "./components/brand";
 import { SignInForm } from "./components/forms";
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ account?: string }> }) {
   const account = await currentAccount();
   if (account) redirect(`/${account.role}`);
+  const preselectDispatch = (await searchParams).account === "dispatch";
 
   return (
     <main className="sign-in-layout">
@@ -29,7 +30,7 @@ export default async function Home() {
         <div className="sign-in-content">
           <h2 id="sign-in-title">Sign in</h2>
           <p className="muted">Choose a demo account below or enter its credentials.</p>
-          <SignInForm />
+          <SignInForm preselectDispatch={preselectDispatch} />
         </div>
       </section>
     </main>
