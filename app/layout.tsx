@@ -5,6 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: { default: "Arrival Desk · Transekur", template: "%s · Arrival Desk" },
   description: "A demo workspace for driver arrival notices.",
+  icons: { icon: { url: "/transekur-mark.png", type: "image/png" } },
   robots: { index: false, follow: false },
 };
 

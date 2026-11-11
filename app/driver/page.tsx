@@ -30,7 +30,7 @@ export default async function DriverPage() {
                 <div className="driver-card-top"><time className="pickup-clock" dateTime={`${service.pickupDate}T${service.pickupTime}-04:00`}>{pickupTimeLabel(service.pickupTime)}</time><span className="reference">TK-{service.id.slice(0, 6).toUpperCase()}</span></div>
                 <h2>{service.clientName}</h2>
                 <p className="driver-pickup"><Icon name="pin" />{service.pickupPoint}</p>
-                {service.sentAt ? <div className="driver-sent"><Icon name="check" /><span><strong>Sent — simulated</strong><time dateTime={service.sentAt}>{sentTimeLabel(service.sentAt)}</time></span></div> : <NotifyForm serviceId={service.id} />}
+                {service.sentAt ? <div className="driver-sent"><Icon name="check" /><span><strong>Sent (simulated)</strong><time dateTime={service.sentAt}>{sentTimeLabel(service.sentAt)}</time></span></div> : <NotifyForm serviceId={service.id} />}
               </li>
             ))}
           </ul>

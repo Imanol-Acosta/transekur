@@ -23,7 +23,7 @@ export default async function DispatchPage() {
       <AutoRefresh />
       <main className="workspace dispatch-workspace">
         <div className="page-intro">
-          <div><span className="eyebrow">Operations / Dispatch</span><h1>Service board</h1><p className="muted">Assign pickups and follow client notices as they go out.</p></div>
+          <div><h1>Service board</h1><p className="muted">Assign pickups and track client notices.</p></div>
           <p className="date-chip"><Icon name="clock" /><span>{dateLabel(day)}<small>Santo Domingo time</small></span></p>
         </div>
         <dl className="metrics">
@@ -48,7 +48,7 @@ export default async function DispatchPage() {
                           <h3>{service.clientName}</h3>
                           <p className="muted">{service.phone} · {clientLanguageLabels[service.clientLanguage]} notice</p>
                         </div>
-                        <span className={`status ${service.sentAt ? "sent" : "waiting"}`}>{service.sentAt ? "Sent — simulated" : "Awaiting notice"}</span>
+                        <span className={`status ${service.sentAt ? "sent" : "waiting"}`}>{service.sentAt ? "Sent (simulated)" : "Awaiting notice"}</span>
                       </div>
                       <div className="service-details">
                         <p><Icon name="pin" />{service.pickupPoint}</p>
@@ -64,7 +64,7 @@ export default async function DispatchPage() {
             )}
           </section>
           <section id="new-service" className="new-service-panel" aria-labelledby="new-service-title">
-            <span className="eyebrow">Pickup details</span><h2 id="new-service-title">New service</h2>
+            <h2 id="new-service-title">New service</h2>
             <p className="muted">Use fictional client details for this demo.</p>
             <NewServiceForm day={day} />
           </section>
