@@ -12,6 +12,20 @@ function FormFeedback({ state }: { state: ActionState }) {
   return null;
 }
 
+function formatPhoneNumber(value: string) {
+  const trimmed = value.trim();
+  if (!/^\+?[\d ().-]*$/.test(trimmed)) return value;
+
+  const digits = trimmed.replace(/\D/g, "");
+  const hasPlus = trimmed.startsWith("+");
+  const hasCountryCode = digits.startsWith("1");
+  if ((hasPlus && !hasCountryCode) || digits.length > (hasCountryCode ? 11 : 10)) return value;
+
+  const local = hasCountryCode ? digits.slice(1) : digits;
+  const countryCode = hasCountryCode ? (hasPlus ? "+1" : "1") : "";
+  return [countryCode, local.slice(0, 3), local.slice(3, 6), local.slice(6)].filter(Boolean).join("-");
+}
+
 export function SignInForm({ preselectDispatch = false }: { preselectDispatch?: boolean }) {
   const [state, action, pending] = useActionState(signIn, {});
   const [email, setEmail] = useState(preselectDispatch ? dispatchAccount.email : "");
@@ -57,10 +71,31 @@ function NewServiceFields({ day, pending }: { day: string; pending: boolean }) {
     setValues((previous) => ({ ...previous, [name]: value }));
   }
 
+  function updatePhone(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.currentTarget;
+    const phone = formatPhoneNumber(input.value);
+    const cursor = input.selectionStart;
+    if (phone !== input.value && cursor !== null && cursor < input.value.length) {
+      let digitsBeforeCursor = input.value.slice(0, cursor).replace(/\D/g, "").length;
+      let nextCursor = phone.startsWith("+") && cursor > 0 ? 1 : 0;
+      while (nextCursor < phone.length && digitsBeforeCursor > 0) {
+        if (/\d/.test(phone[nextCursor])) digitsBeforeCursor -= 1;
+        nextCursor += 1;
+      }
+      if (event.nativeEvent instanceof InputEvent && event.nativeEvent.inputType === "deleteContentForward" && phone === values.phone && phone[nextCursor] === "-") {
+        nextCursor += 1;
+      }
+      requestAnimationFrame(() => {
+        if (document.activeElement === input && input.value === phone) input.setSelectionRange(nextCursor, nextCursor);
+      });
+    }
+    setValues((previous) => ({ ...previous, phone }));
+  }
+
   return (
     <>
       <label>Client name<input name="clientName" value={values.clientName} onChange={updateField} maxLength={80} placeholder="e.g. Ana Castillo" required disabled={pending} /></label>
-      <label>Phone number<input name="phone" value={values.phone} onChange={updateField} type="tel" maxLength={28} placeholder="e.g. +1 809 555 0100" required disabled={pending} /></label>
+      <label>Phone number<input name="phone" value={values.phone} onChange={updatePhone} type="tel" autoComplete="tel" maxLength={28} placeholder="e.g. 809-555-0100" required disabled={pending} /></label>
       <label>
         Client notice language
         <select name="clientLanguage" value={values.clientLanguage} onChange={updateField} required disabled={pending}>
