@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+.vercel/
+.transekur-demo/
+supabase/.temp/
+supabase/.branches/
+.transekur-demo/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.env*
+!.env.example

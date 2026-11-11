@@ -1,0 +1,4 @@
+.env*
+.transekur-demo/
+scripts/
+supabase/
